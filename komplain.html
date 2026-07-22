@@ -110,6 +110,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 </div>
 
+<script src="auth.js"></script>
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxjdx0xB0Bi-McWDOBTgAgc-ul2wKr2M_ezZhB3Lf3O17EgJthzaR1WoHElYroPMs-cVQ/exec';
 
@@ -284,7 +285,9 @@ async function submitInvestigasi(komplainId) {
   openDetail(komplainId);
 }
 
-loadKomplainList();
+Auth.requireLogin(["ROLE-SUPERVISOR", "ROLE-OWNER", "ROLE-ADMIN"]).then(() => {
+  loadKomplainList();
+});
 </script>
 </body>
 </html>

@@ -63,6 +63,7 @@ select.form-select { width: 100%; padding: 9px 10px; border: 1.5px solid var(--g
   <div class="content" id="content"><div class="empty-state">Memuat data...</div></div>
 </div>
 
+<script src="auth.js"></script>
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxjdx0xB0Bi-McWDOBTgAgc-ul2wKr2M_ezZhB3Lf3O17EgJthzaR1WoHElYroPMs-cVQ/exec';
 let currentTab = 'operasional';
@@ -186,7 +187,9 @@ async function renderKerusakan() {
     renderList('Sparepart Paling Sering Digunakan', d.sparepartPalingSeringDigunakan, 'Belum ada data');
 }
 
-render();
+Auth.requireLogin(["ROLE-ADMIN", "ROLE-SUPERVISOR", "ROLE-OWNER"]).then(() => {
+  render();
+});
 </script>
 </body>
 </html>
