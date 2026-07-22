@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>HCS-ISMS — Dashboard</title>
+<style>
+:root {
+  --navy: #1A3557; --blue: #2C6AA0; --sky: #E8F2FB;
+  --green: #1D7A4A; --green-light: #E8F5EE;
+  --orange: #C0550A; --orange-light: #FDF0E8;
+  --red: #C0392B; --red-light: #FDEDEC;
+  --gray-50: #F8FAFC; --gray-100: #F1F5F9; --gray-200: #E2E8F0;
+  --gray-400: #94A3B8; --gray-600: #475569; --gray-800: #1E293B;
+  --radius: 12px; --radius-sm: 8px;
+  --shadow: 0 2px 12px rgba(26,53,87,0.10);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--gray-100); color: var(--gray-800); min-height: 100vh; font-size: 14px; }
+#app { max-width: 520px; margin: 0 auto; min-height: 100vh; background: var(--gray-100); }
+.app-header { background: var(--navy); color: white; padding: 16px 18px; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 10; }
+.header-title { font-size: 16px; font-weight: 700; }
+.header-sub { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+.tab-bar { display: flex; background: white; border-bottom: 1.5px solid var(--gray-200); position: sticky; top: 68px; z-index: 9; overflow-x: auto; }
+.tab-item { flex: 1; text-align: center; padding: 12px 8px; font-size: 12px; font-weight: 700; color: var(--gray-400); cursor: pointer; border-bottom: 2.5px solid transparent; white-space: nowrap; }
+.tab-item.active { color: var(--blue); border-bottom-color: var(--blue); }
+.content { padding: 16px; }
+.card { background: white; border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; }
+.section-label { font-size: 11px; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.4px; margin: 16px 0 8px; }
+.section-label:first-child { margin-top: 0; }
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kpi-box { background: white; border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 14px; }
+.kpi-value { font-size: 24px; font-weight: 800; color: var(--navy); }
+.kpi-label { font-size: 11.5px; color: var(--gray-600); margin-top: 2px; }
+.kpi-box.blue { background: var(--sky); border-color: var(--sky); }
+.kpi-box.green { background: var(--green-light); border-color: var(--green-light); }
+.kpi-box.orange { background: var(--orange-light); border-color: var(--orange-light); }
+.kpi-box.red { background: var(--red-light); border-color: var(--red-light); }
+.kpi-box.blue .kpi-value { color: var(--blue); }
+.kpi-box.green .kpi-value { color: var(--green); }
+.kpi-box.orange .kpi-value { color: var(--orange); }
+.kpi-box.red .kpi-value { color: var(--red); }
+.list-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
+.list-row:last-child { border-bottom: none; }
+.bar-bg { background: var(--gray-100); border-radius: 6px; height: 8px; overflow: hidden; flex: 1; margin: 0 10px; }
+.bar-fill { background: var(--blue); height: 100%; border-radius: 6px; }
+.empty-state { text-align: center; padding: 30px 20px; color: var(--gray-400); }
+select.form-select { width: 100%; padding: 9px 10px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="app-header">
+    <div class="header-title">📊 Dashboard HCS-ISMS</div>
+    <div class="header-sub" id="tanggalHeader">Memuat...</div>
+  </div>
+  <div class="tab-bar">
+    <div class="tab-item active" data-tab="operasional" onclick="switchTab('operasional')">Operasional</div>
+    <div class="tab-item" data-tab="kualitas" onclick="switchTab('kualitas')">Kualitas</div>
+    <div class="tab-item" data-tab="teknisi" onclick="switchTab('teknisi')">Teknisi</div>
+    <div class="tab-item" data-tab="kerusakan" onclick="switchTab('kerusakan')">Kerusakan</div>
+  </div>
+  <div class="content" id="content"><div class="empty-state">Memuat data...</div></div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxjdx0xB0Bi-McWDOBTgAgc-ul2wKr2M_ezZhB3Lf3O17EgJthzaR1WoHElYroPMs-cVQ/exec';
+let currentTab = 'operasional';
+
+async function gasGet(action, params) {
+  const url = new URL(GAS_URL);
+  url.searchParams.set('action', action);
+  Object.entries(params || {}).forEach(([k, v]) => { if (v !== undefined && v !== null) url.searchParams.set(k, v); });
+  const res = await fetch(url.toString());
+  return res.json();
+}
+function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  render();
+}
+
+async function render() {
+  const content = document.getElementById('content');
+  content.innerHTML = '<div class="empty-state">Memuat...</div>';
+  if (currentTab === 'operasional') await renderOperasional();
+  if (currentTab === 'kualitas') await renderKualitas();
+  if (currentTab === 'teknisi') await renderTeknisi();
+  if (currentTab === 'kerusakan') await renderKerusakan();
+}
+
+async function renderOperasional() {
+  const r = await gasGet('getDashboardOperasional', {});
+  if (!r.success) { document.getElementById('content').innerHTML = `<div class="empty-state">${r.error}</div>`; return; }
+  const d = r.data;
+  document.getElementById('tanggalHeader').textContent = 'Data per ' + d.tanggal;
+  document.getElementById('content').innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi-box blue"><div class="kpi-value">${d.woHariIni}</div><div class="kpi-label">WO Hari Ini</div></div>
+      <div class="kpi-box green"><div class="kpi-value">${d.woSelesai}</div><div class="kpi-label">WO Selesai (Total)</div></div>
+      <div class="kpi-box orange"><div class="kpi-value">${d.woTertunda}</div><div class="kpi-label">WO Tertunda</div></div>
+      <div class="kpi-box red"><div class="kpi-value">${d.woDibatalkan}</div><div class="kpi-label">WO Dibatalkan</div></div>
+    </div>
+    <div class="section-label">Ringkasan Lain</div>
+    <div class="card">
+      <div class="list-row"><span>Total WO Tercatat</span><b>${d.totalWO}</b></div>
+      <div class="list-row"><span>Perlu Kunjungan Lanjutan</span><b>${d.kunjunganLanjutan}</b></div>
+      <div class="list-row"><span>Rata-rata Durasi Perbaikan</span><b>${d.rataDurasiMenit} menit</b></div>
+    </div>
+    <div class="section-label">Utilisasi Teknisi Hari Ini</div>
+    <div class="card">
+      ${d.utilisasiTeknisi.length ? d.utilisasiTeknisi.map(t => `
+        <div class="list-row"><span>${escapeHtml(t.nama)}</span><b>${t.jumlahWO} WO</b></div>
+      `).join('') : '<div class="empty-state">Belum ada data</div>'}
+    </div>
+    <div style="font-size:11px;color:var(--gray-400);text-align:center;margin-top:6px">${escapeHtml(d.catatan)}</div>
+  `;
+}
+
+async function renderKualitas() {
+  const r = await gasGet('getDashboardKualitas', {});
+  if (!r.success) { document.getElementById('content').innerHTML = `<div class="empty-state">${r.error}</div>`; return; }
+  const d = r.data;
+  document.getElementById('tanggalHeader').textContent = 'Dashboard Kualitas';
+  document.getElementById('content').innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi-box green"><div class="kpi-value">${d.persenKelengkapan}%</div><div class="kpi-label">Kelengkapan Laporan</div></div>
+      <div class="kpi-box blue"><div class="kpi-value">${d.firstTimeFixRatePersen}%</div><div class="kpi-label">First-Time Fix Rate</div></div>
+      <div class="kpi-box red"><div class="kpi-value">${d.redoCount}</div><div class="kpi-label">Jumlah Redo</div></div>
+      <div class="kpi-box orange"><div class="kpi-value">${d.jumlahKomplain}</div><div class="kpi-label">Jumlah Komplain</div></div>
+    </div>
+    <div class="section-label">Detail Kelengkapan</div>
+    <div class="card">
+      <div class="list-row"><span>WO Selesai (Total)</span><b>${d.woSelesaiTotal}</b></div>
+      <div class="list-row"><span>WO Selesai & Lengkap</span><b>${d.woSelesaiLengkap}</b></div>
+      <div class="list-row"><span>Pekerjaan Tanpa Foto</span><b style="color:var(--red)">${d.pekerjaanTanpaFoto}</b></div>
+      <div class="list-row"><span>Pekerjaan Tanpa Final Test</span><b style="color:var(--red)">${d.pekerjaanTanpaFinalTest}</b></div>
+      <div class="list-row"><span>Pekerjaan Tanpa Tanda Tangan</span><b style="color:var(--red)">${d.pekerjaanTanpaTandaTangan}</b></div>
+      <div class="list-row"><span>Final Test Tidak Lulus</span><b style="color:var(--red)">${d.finalTestTidakLulus}</b></div>
+      <div class="list-row"><span>Parameter Belum Ada Nilai</span><b style="color:var(--orange)">${d.parameterTanpaNilai}</b></div>
+      <div class="list-row"><span>Redo Rate</span><b>${d.redoRatePersen}%</b></div>
+    </div>
+  `;
+}
+
+async function renderTeknisi() {
+  const r = await gasGet('getDashboardTeknisi', {});
+  if (!r.success) { document.getElementById('content').innerHTML = `<div class="empty-state">${r.error}</div>`; return; }
+  document.getElementById('tanggalHeader').textContent = 'Performa Teknisi';
+  if (!r.data.length) { document.getElementById('content').innerHTML = '<div class="empty-state">Belum ada data teknisi</div>'; return; }
+  document.getElementById('content').innerHTML = r.data.map(t => `
+    <div class="card">
+      <div style="font-weight:700;color:var(--navy);font-size:14px;margin-bottom:8px">${escapeHtml(t.nama)}</div>
+      <div class="list-row"><span>Jumlah Pekerjaan</span><b>${t.jumlahPekerjaan}</b></div>
+      <div class="list-row"><span>Selesai</span><b>${t.jumlahSelesai}</b></div>
+      <div class="list-row"><span>Kelengkapan Laporan</span><div class="bar-bg"><div class="bar-fill" style="width:${t.kelengkapanLaporanPersen}%"></div></div><b>${t.kelengkapanLaporanPersen}%</b></div>
+      <div class="list-row"><span>Kelengkapan Dokumentasi</span><div class="bar-bg"><div class="bar-fill" style="width:${t.kelengkapanDokumentasiPersen}%"></div></div><b>${t.kelengkapanDokumentasiPersen}%</b></div>
+      <div class="list-row"><span>Kelengkapan Parameter</span><div class="bar-bg"><div class="bar-fill" style="width:${t.kelengkapanParameterPersen}%"></div></div><b>${t.kelengkapanParameterPersen}%</b></div>
+      <div class="list-row"><span>Komplain</span><b style="color:${t.jumlahKomplain ? 'var(--red)' : 'inherit'}">${t.jumlahKomplain}</b></div>
+      <div class="list-row"><span>Redo</span><b style="color:${t.jumlahRedo ? 'var(--red)' : 'inherit'}">${t.jumlahRedo} (${t.redoRatePersen}%)</b></div>
+    </div>
+  `).join('');
+}
+
+async function renderKerusakan() {
+  const r = await gasGet('getDashboardKerusakan', {});
+  if (!r.success) { document.getElementById('content').innerHTML = `<div class="empty-state">${r.error}</div>`; return; }
+  const d = r.data;
+  document.getElementById('tanggalHeader').textContent = 'Analisis Kerusakan';
+
+  function renderList(title, items, emptyMsg) {
+    return `
+      <div class="section-label">${title}</div>
+      <div class="card">
+        ${items.length ? items.slice(0, 8).map(i => `<div class="list-row"><span>${escapeHtml(i.label)}</span><b>${i.jumlah}</b></div>`).join('') : `<div class="empty-state">${emptyMsg}</div>`}
+      </div>`;
+  }
+
+  document.getElementById('content').innerHTML =
+    renderList('Jenis Unit Paling Sering Rusak', d.jenisUnitPalingSeringRusak, 'Belum ada data diagnosis') +
+    renderList('Akar Penyebab Tersering', d.akarPenyebab, 'Belum ada data') +
+    renderList('Komponen Paling Sering Bermasalah', d.komponenBermasalah, 'Belum ada data') +
+    renderList('Merk Unit Paling Sering Rusak', d.merkPalingSeringRusak, 'Belum ada data') +
+    renderList('Sparepart Paling Sering Digunakan', d.sparepartPalingSeringDigunakan, 'Belum ada data');
+}
+
+Auth.requireLogin(["ROLE-ADMIN", "ROLE-SUPERVISOR", "ROLE-OWNER"]).then(() => {
+  render();
+});
+</script>
+</body>
+</html>

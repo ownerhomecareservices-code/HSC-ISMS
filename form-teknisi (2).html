@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>HCS-ISMS — Form Teknisi</title>
+<style>
+:root {
+  --navy: #1A3557; --blue: #2C6AA0; --sky: #E8F2FB;
+  --green: #1D7A4A; --green-light: #E8F5EE;
+  --orange: #C0550A; --orange-light: #FDF0E8;
+  --red: #C0392B; --red-light: #FDEDEC;
+  --gray-50: #F8FAFC; --gray-100: #F1F5F9; --gray-200: #E2E8F0;
+  --gray-400: #94A3B8; --gray-600: #475569; --gray-800: #1E293B;
+  --white: #FFFFFF; --radius: 12px; --radius-sm: 8px;
+  --shadow: 0 2px 12px rgba(26,53,87,0.10); --shadow-lg: 0 8px 32px rgba(26,53,87,0.15);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--gray-100); color: var(--gray-800); min-height: 100vh; font-size: 14px; line-height: 1.5; }
+#app { max-width: 480px; margin: 0 auto; min-height: 100vh; background: var(--white); display: flex; flex-direction: column; }
+
+.app-header { background: var(--navy); color: var(--white); padding: 14px 18px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
+.header-top { display: flex; align-items: center; gap: 12px; }
+.btn-back { width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,0.15); color: white; font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.header-title { font-size: 15px; font-weight: 700; flex: 1; }
+.header-sub { font-size: 11.5px; opacity: 0.75; margin-top: 1px; }
+.progress-bar { height: 4px; background: rgba(255,255,255,0.2); border-radius: 4px; margin-top: 10px; overflow: hidden; }
+.progress-fill { height: 100%; background: white; border-radius: 4px; transition: width 0.25s; }
+
+.step { display: none; flex: 1; flex-direction: column; padding-bottom: 90px; }
+.step.active { display: flex; }
+.content { padding: 16px; flex: 1; }
+
+.section-label { font-size: 11px; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.4px; margin: 16px 0 8px; }
+.section-label:first-child { margin-top: 0; }
+.card { background: white; border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+
+.form-group { margin-bottom: 12px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-600); margin-bottom: 5px; }
+.form-label .req { color: var(--red); }
+.form-input, .form-select, .form-textarea { width: 100%; padding: 10px 12px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); font-size: 14px; background: white; color: var(--gray-800); font-family: inherit; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--blue); }
+.form-textarea { resize: vertical; min-height: 55px; }
+.form-row { display: flex; gap: 10px; }
+.form-row > .form-group { flex: 1; }
+
+.btn { display: block; width: 100%; padding: 13px; border-radius: var(--radius-sm); border: none; font-size: 14px; font-weight: 700; cursor: pointer; text-align: center; }
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:disabled { background: var(--gray-400); cursor: not-allowed; }
+.btn-secondary { background: white; color: var(--navy); border: 1.5px solid var(--navy); }
+.btn-ghost { background: none; color: var(--gray-600); border: 1px dashed var(--gray-400); font-weight: 600; }
+.fab-bar { position: sticky; bottom: 0; background: white; border-top: 1px solid var(--gray-200); padding: 12px 16px; display: flex; gap: 10px; }
+
+.checklist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--gray-100); gap: 10px; }
+.checklist-item:last-child { border-bottom: none; }
+.checklist-name { font-size: 13px; flex: 1; }
+.checklist-select { width: 150px; flex-shrink: 0; padding: 7px 8px; border: 1.5px solid var(--gray-200); border-radius: 7px; font-size: 12px; }
+
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 7px 12px; border: 1.5px solid var(--gray-200); border-radius: 20px; font-size: 12.5px; cursor: pointer; background: white; }
+.chip.selected { background: var(--blue); border-color: var(--blue); color: white; font-weight: 600; }
+
+.param-row { border: 1px solid var(--gray-200); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px; }
+.param-name { font-weight: 700; font-size: 13px; color: var(--navy); }
+.param-standar { font-size: 11px; color: var(--gray-600); margin-bottom: 6px; }
+.param-input-row { display: flex; gap: 8px; align-items: center; }
+.param-status { font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 10px; flex-shrink: 0; }
+.status-SESUAI { background: var(--green-light); color: var(--green); }
+.status-TIDAK_SESUAI { background: var(--red-light); color: var(--red); }
+.status-PERLU_PERHATIAN { background: var(--orange-light); color: var(--orange); }
+
+.repair-entry, .sparepart-entry { border: 1px solid var(--gray-200); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 10px; position: relative; }
+.entry-remove { position: absolute; top: 8px; right: 8px; background: var(--red-light); color: var(--red); border: none; border-radius: 6px; width: 24px; height: 24px; font-size: 13px; cursor: pointer; }
+
+.toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--gray-800); color: white; padding: 10px 18px; border-radius: 24px; font-size: 13px; z-index: 999; box-shadow: var(--shadow-lg); opacity: 0; transition: opacity 0.2s; max-width: 90%; text-align: center; }
+.toast.show { opacity: 1; }
+.empty-state { text-align: center; padding: 30px 20px; color: var(--gray-400); }
+
+.wo-load-box { padding: 20px; }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.badge-missing { display:inline-block; background:var(--red-light); color:var(--red); font-size:11.5px; font-weight:600; padding:5px 10px; border-radius:8px; margin:3px 4px 0 0; }
+
+.job-item { border: 1px solid var(--gray-200); border-radius: 10px; padding: 12px; margin-bottom: 8px; cursor: pointer; text-align: left; }
+.job-item:active { background: var(--sky); }
+.job-name { font-weight: 700; font-size: 13.5px; color: var(--navy); }
+.job-meta { font-size: 11.5px; color: var(--gray-600); margin-top: 2px; }
+.job-badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+.job-badge-draft { background: var(--gray-100); color: var(--gray-600); }
+.job-badge-progress { background: var(--sky); color: var(--blue); }
+.job-badge-done { background: var(--green-light); color: var(--green); }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══ LOAD WO ══ -->
+  <div class="step active" id="stepLoad">
+    <div class="app-header">
+      <div class="header-title">🔧 Form Teknisi</div>
+      <div class="header-sub">HCS-ISMS</div>
+    </div>
+    <div class="wo-load-box">
+      <div class="section-label">Pekerjaan Saya</div>
+      <div id="pekerjaanSayaList"><div class="empty-state">Memuat...</div></div>
+
+      <div class="section-label" style="margin-top:20px">Atau Buka Manual</div>
+      <div class="form-group">
+        <input class="form-input" id="loadWoId" placeholder="Contoh: WO-000001">
+      </div>
+      <button class="btn btn-primary" onclick="loadWO()">Buka</button>
+      <div id="loadStatus" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 0: RINGKASAN ══ -->
+  <div class="step" id="step0">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="backToLoad()">←</button>
+        <div><div class="header-title" id="sumNomorWO">WO</div><div class="header-sub">Ringkasan</div></div>
+      </div>
+    </div>
+    <div class="content" id="ringkasanContent"></div>
+    <div class="fab-bar"><button class="btn btn-primary" onclick="goStep(1)">Mulai Pengerjaan →</button></div>
+  </div>
+
+  <!-- ══ STEP 1: PEMERIKSAAN AWAL ══ -->
+  <div class="step" id="step1">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goStep(0)">←</button>
+        <div><div class="header-title">Pemeriksaan Awal</div><div class="header-sub">Langkah 1 / 10</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:10%"></div></div>
+    </div>
+    <div class="content" id="pemeriksaanContent"></div>
+    <div class="fab-bar"><button class="btn btn-primary" onclick="submitPemeriksaan()">Simpan & Lanjut</button></div>
+  </div>
+
+  <!-- ══ STEP 2: KELUHAN CUSTOMER ══ -->
+  <div class="step" id="step2">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goStep(1)">←</button>
+        <div><div class="header-title">Keluhan Customer</div><div class="header-sub">Langkah 2 / 10</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div>
+    </div>
+    <div class="content">
+      <div class="section-label">Pilih keluhan (bisa lebih dari satu)</div>
+      <div class="chip-group" id="keluhanChips"></div>
+      <div class="section-label">Detail</div>
+      <div class="card">
+        <div class="form-group"><label class="form-label">Deskripsi Keluhan</label><textarea class="form-textarea" id="keluhanDeskripsi"></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Waktu Mulai Terjadi</label><input class="form-input" id="keluhanWaktu" placeholder="Contoh: 3 hari lalu"></div>
+          <div class="form-group"><label class="form-label">Frekuensi</label><input class="form-input" id="keluhanFrekuensi" placeholder="Contoh: Setiap hari"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Riwayat Service Sebelumnya</label><input class="form-input" id="keluhanRiwayat"></div>
+      </div>
+    </div>
+    <div class="fab-bar"><button class="btn btn-primary" onclick="submitKeluhan()">Simpan & Lanjut</button></div>
+  </div>
+
+  <!-- ══ STEP 3: RUNNING TEST AWAL ══ -->
+  <div class="step" id="step3">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goStep(2)">←</button>
+        <div><div class="header-title">Running Test Awal</div><div class="header-sub">Langkah 3 / 10</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div>
+    </div>
+    <div class="content">
+      <div class="section-label">Status</div>
+      <div class="card">
+        <div class="form-group">
+          <select class="form-select" id="rtStatus" onchange="toggleAlasanTidakAman()">
+            <option value="DAPAT_DIJALANKAN">Dapat Dijalankan</option>
+            <option value="TIDAK_DAPAT_DIJALANKAN">Tidak Dapat Dijalankan</option>
+            <option value="TIDAK_AMAN_DIJALANKAN">Tidak Aman Dijalankan</option>
+            <option value="CUSTOMER_TIDAK_MENGIZINKAN">Customer Tidak Mengizinkan</option>
+          </select>
+        </div>
+        <div class="form-group" id="rtAlasanWrap" style="display:none">
+          <label class="form-label">Alasan <span class="req">*</span></label>
+          <textarea class="form-textarea" id="rtAlasan"></textarea>
+        </div>
+      </div>
+      <div class="section-label">Checklist</div>
+      <div class="card" id="runningTestChecklist"></div>
+    </div>
+    <div class="fab-bar"><button class="btn btn-primary" onclick="submitRunningTest()">Simpan & Lanjut</button></div>
+  </div>
+
+  <!-- ══ STEP 4: PARAMETER AWAL ══ -->
+  <div class="step" id="step4">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goStep(3)">←</button>
+        <div><div class="header-title">Parameter Pengukuran Awal</div><div class="header-sub" id="step4Label">Langkah 4 / 10</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+    </div>
+    <div class="content">
+      <div class="card" id="temuanToggleCard" style="display:none;background:var(--sky);border-color:var(--sky)">
+        <div style="font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:8px">Ada temuan kerusakan yang perlu ditindaklanjuti (diagnosis/perbaikan)?</div>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn" id="btnTemuanTidak" style="flex:1;margin:0;padding:9px;background:var(--blue);color:white" onclick="setAdaTemuan(false)">Tidak Ada</button>
+          <button type="button" class="btn" id="btnTemuanYa" style="flex:1;margin:0;padding:9px;background:white;color:var(--navy);border:1.5px solid var(--navy)" onclick="setAdaTemuan(true)">Ada Temuan</button>
+        </div>
+        <div style="font-size:11px;color:var(--gray-600);margin-top:8px">Kalau "Tidak Ada", langkah Diagnosis/Persetujuan/Perbaikan/Sparepart otomatis dilewati.</div>
+      </div>
+      <div id="paramAwalContent"></div>
+    </div>
+    <div class="fab-bar"><button class="btn btn-primary" onclick="submitParameterAwal()">Simpan & Lanjut</button></div>
+  </div>
+
+  <!-- ══ STEP 5: DIAGNOSIS ══ -->
+  <div class="step" id="step5">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goStep(4)">←</button>
+        <div><div class="header-title">Diagnosis Teknisi</div><div class="header-sub">Langkah 5 / 10</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+    </div>
+    <div class="content">
+      <div class="card">
+        <div class="form-group"><label class="form-label">Temuan Teknisi</label><textarea class="form-textarea" id="dgTemuan" placeholder="Fakta yang ditemukan saat pemeriksaan"></textarea></div>
+        <div class="form-group"><label class="form-label">Analisa Penyebab</label><textarea class="form-textarea" id="dgAnalisa" placeholder="Hubungan temuan dengan gangguan unit"></textarea></div>
+        <div class="form-group">
+          <label class="form-label">Akar Penyebab</label>
+          <select class="form-select" id="dgAkar">
+            <option value="ELECTRICAL">Electrical</option><option value="MECHANICAL">Mechanical</option>
+            <option value="REFRIGERATION">Refrigeration</option><option value="INSTALLATION">Installation</option>
+            <option value="MAINTENANCE">Maintenance</option><option value="USAGE">Usage</option>
+            <option value="SPAREPART_FAILURE">Sparepart Failure</option><option value="AGEING">Ageing</option>
+            <option value="CONTAMINATION">Contamination</option><option value="BLOCKAGE">Blockage</option>
+            <option value="LEAKAGE">Leakage</option><option value="HUMAN_ERROR">Human Error</option>
+            <option value="EXTERNAL_FACTOR">External Factor</option><option value="PREVIOUS_REPAIR">Previous Repair</option>
+            <option value="UNKNOWN">Unknown</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Komponen Bermasalah</label><input class="form-input" id="dgKomponen" placeholder="Contoh: Kompresor, PCB, Thermostat"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tingkat Kerusakan</label>
+            <select class="form-select" id="dgTingkatKerusakan"><option>RINGAN</option><option>SEDANG</option><option>BERAT</option><option>KRITIS</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tingkat Risiko</label>
+            <select class="form-select" id="dgTingkatRisiko"><option>RENDAH</option><option>SEDANG</option><option>TINGGI</option><option>TIDAK_AMAN_DIGUNAKAN</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Rencana Tindakan</label><textarea class="form-textarea" id="dgRencana"></textarea></div>
+        <div class="form-group"><label class="form-label">Estimasi Sparepart</label><input class="form-input" id="dgEstSparepart"></div>
+        <div class="form-group"><label class="form-label">Estimasi Durasi (menit)</label><input class="form-input" type="number" id="dgEstDurasi"></div>
+      </div>
+    </div>
+    <div class="fab-bar"><button class="btn btn-primary" onclick="submitDiagnosis()">Simpan & Lanjut</button></div>
+  </div>
+
+  <!-- ══ STEP 6: PERSETUJUAN CUSTOMER ══ -->
+  <div class="step" id="step6">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goStep(5)">←</button>
+        <div><div class="header-title">Persetujuan Customer</div><div class="header-sub">Langkah 6 / 10</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+    </div>
+    <div class="content">
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Status Persetujuan <span class="req">*</span></label>
+          <select class="form-select" id="psStatus">
+            <option value="DISETUJUI">Disetujui</option><option value="DISETUJUI_SEBAGIAN">Disetujui Sebagian</option>
+            <option value="DITOLAK">Ditolak</option><option value="DITUNDA">Ditunda</option>
+            <option value="TIDAK_DIPERLUKAN">Tidak Diperlukan</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Tindakan yang Ditawarkan</label><textarea class="form-textarea" id="psTindakanTawar"></textarea></div>
+        <div class="form-group"><label class="form-label">Tindakan yang Disetujui</label><textarea class="form-textarea" id="psTindakanSetuju"></textarea></div>
+        <div class="form-group"><label class="form-label">Estimasi Waktu</label><input class="form-input" id="psWaktu" placeholder="Contoh: 2 jam"></div>
+        <div class="form-group"><label class="form-label">Catatan Customer</label><textarea class="form-textarea" id="psCatatan"></textarea></div>
+        <div class="form-group"><label class="form-label">Nama Customer / PIC yang Menyetujui</label><input class="form-input" id="psNamaPIC"></div>
+      </div>
+    </div>
+    <div class="fab-bar"><button class="btn btn-primary" onclick="submitPersetujuan()">Simpan & Lanjut</button></div>
+  </div>
+
+  <!-- ══ STEP 7: HASIL PERBAIKAN ══ -->
+  <div class="step" id="step7">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goStep(6)">←</button>
+        <div><div class="header-title">Hasil Perbaikan</div><div class="header-sub">Langkah 7 / 10</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div>
+    </div>
+    <div class="content">
+      <div id="repairEntries"></div>
+      <button class="btn btn-ghost" onclick="addRepairEntry()">+ Tambah Tindakan Perbaikan</button>
+    </div>
+    <div class="fab-bar"><button class="btn btn-primary" onclick="submitPerbaikan()">Simpan & Lanjut</button></div>
+  </div>
+
+  <!-- ══ STEP 8: SPAREPART ══ -->
+  <div class="step" id="step8">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goStep(7)">←</button>
+        <div><div class="header-title">Penggantian Sparepart</div><div class="header-sub">Langkah 8 / 10</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+    </div>
+    <div class="content">
+      <div id="sparepartEntries"></div>
+      <button class="btn btn-ghost" onclick="addSparepartEntry()">+ Tambah Sparepart</button>
+    </div>
+    <div class="fab-bar"><button class="btn btn-primary" onclick="submitSparepart()">Simpan & Lanjut</button></div>
+  </div>
+
+  <!-- ══ STEP 9: PARAMETER AKHIR ══ -->
+  <div class="step" id="step9">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goStep(W.adaTemuan ? 8 : 4)">←</button>
+        <div><div class="header-title">Parameter Pengukuran Akhir</div><div class="header-sub">Langkah 9 / 10</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:88%"></div></div>
+    </div>
+    <div class="content" id="paramAkhirContent"></div>
+    <div class="fab-bar"><button class="btn btn-primary" onclick="submitParameter('AKHIR', 10)">Simpan & Lanjut</button></div>
+  </div>
+
+  <!-- ══ STEP 10: FINAL TEST + REKOMENDASI ══ -->
+  <div class="step" id="step10">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goStep(9)">←</button>
+        <div><div class="header-title">Final Test & Rekomendasi</div><div class="header-sub">Langkah 10 / 10</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:96%"></div></div>
+    </div>
+    <div class="content">
+      <div class="section-label">Final Test — Checklist</div>
+      <div class="card" id="finalTestChecklist"></div>
+      <div class="section-label">Status Final Test</div>
+      <div class="card">
+        <select class="form-select" id="ftStatus">
+          <option value="LULUS">Lulus</option><option value="LULUS_DENGAN_CATATAN">Lulus dengan Catatan</option>
+          <option value="TIDAK_LULUS">Tidak Lulus</option><option value="PERLU_MONITORING">Perlu Monitoring</option>
+          <option value="PERLU_KUNJUNGAN_LANJUTAN">Perlu Kunjungan Lanjutan</option>
+        </select>
+        <div class="form-group" style="margin-top:10px"><textarea class="form-textarea" id="ftCatatan" placeholder="Catatan final test (opsional)"></textarea></div>
+      </div>
+
+      <div class="section-label">Rekomendasi Teknisi</div>
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Kondisi Unit <span class="req">*</span></label>
+          <select class="form-select" id="rkKondisi">
+            <option value="SANGAT_BAIK">Sangat Baik</option><option value="BAIK">Baik</option><option value="CUKUP">Cukup</option>
+            <option value="PERLU_MONITORING">Perlu Monitoring</option><option value="PERLU_SERVICE_BERKALA">Perlu Service Berkala</option>
+            <option value="PERLU_PERBAIKAN_LANJUTAN">Perlu Perbaikan Lanjutan</option><option value="PERLU_OVERHAUL">Perlu Overhaul</option>
+            <option value="TIDAK_LAYAK_OPERASI">Tidak Layak Operasi</option><option value="DISARANKAN_PENGGANTIAN_UNIT">Disarankan Penggantian Unit</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Rekomendasi Tindakan</label><textarea class="form-textarea" id="rkTindakan"></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Waktu Service Berikutnya</label><input class="form-input" type="date" id="rkWaktuService"></div>
+          <div class="form-group"><label class="form-label">Estimasi Umur Pakai</label><input class="form-input" id="rkUmurPakai" placeholder="Contoh: 2 tahun lagi"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Catatan Penggunaan untuk Customer</label><textarea class="form-textarea" id="rkCatatanPenggunaan"></textarea></div>
+        <div class="form-group"><label class="form-label">Risiko Jika Tidak Ditindaklanjuti</label><textarea class="form-textarea" id="rkRisiko"></textarea></div>
+      </div>
+    </div>
+    <div class="fab-bar"><button class="btn btn-primary" id="btnBuatWO" onclick="submitFinalTestDanRekomendasi()">Simpan & Lanjut ke Dokumentasi</button></div>
+  </div>
+
+  <!-- ══ STEP 11: DOKUMENTASI ══ -->
+  <div class="step" id="step11">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goStep(10)">←</button>
+        <div><div class="header-title">Dokumentasi Foto</div><div class="header-sub">Langkah 11 / 12</div></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="section-label">Wajib — Sebelum Pekerjaan</div>
+      <div class="card">
+        ${''}
+        <div class="form-group"><label class="form-label">Foto Tampak Depan Unit</label><input class="form-input" type="file" accept="image/*" capture="environment" id="doc_depan"></div>
+        <div class="form-group"><label class="form-label">Foto Nameplate</label><input class="form-input" type="file" accept="image/*" capture="environment" id="doc_nameplate"></div>
+        <div class="form-group"><label class="form-label">Foto Kondisi Awal</label><input class="form-input" type="file" accept="image/*" capture="environment" id="doc_kondisi_awal"></div>
+        <div class="form-group"><label class="form-label">Foto Area Keluhan</label><input class="form-input" type="file" accept="image/*" capture="environment" id="doc_area_keluhan"></div>
+      </div>
+      <div class="section-label">Wajib — Setelah Pekerjaan</div>
+      <div class="card">
+        <div class="form-group"><label class="form-label">Foto Unit Selesai</label><input class="form-input" type="file" accept="image/*" capture="environment" id="doc_unit_selesai"></div>
+        <div class="form-group"><label class="form-label">Foto Area Kerja (Bersih)</label><input class="form-input" type="file" accept="image/*" capture="environment" id="doc_area_kerja"></div>
+        <div class="form-group"><label class="form-label">Foto Hasil Akhir</label><input class="form-input" type="file" accept="image/*" capture="environment" id="doc_hasil_akhir"></div>
+      </div>
+      <div class="section-label">Opsional</div>
+      <div class="card">
+        <div class="form-group"><label class="form-label">Foto Komponen Rusak / Temuan</label><input class="form-input" type="file" accept="image/*" capture="environment" id="doc_temuan"></div>
+        <div class="form-group"><label class="form-label">Foto Sparepart Lama</label><input class="form-input" type="file" accept="image/*" capture="environment" id="doc_sparepart_lama"></div>
+        <div class="form-group"><label class="form-label">Foto Sparepart Baru</label><input class="form-input" type="file" accept="image/*" capture="environment" id="doc_sparepart_baru"></div>
+      </div>
+      <div id="uploadProgress" style="font-size:12px;color:var(--gray-600);text-align:center;margin-top:8px"></div>
+    </div>
+    <div class="fab-bar"><button class="btn btn-primary" id="btnUploadDok" onclick="submitDokumentasi()">Upload & Lanjut</button></div>
+  </div>
+
+  <!-- ══ STEP 12: TANDA TANGAN ══ -->
+  <div class="step" id="step12">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="goStep(11)">←</button>
+        <div><div class="header-title">Tanda Tangan Digital</div><div class="header-sub">Langkah 12 / 12</div></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="section-label">Tanda Tangan Teknisi</div>
+      <div class="card">
+        <div style="font-size:12px;color:var(--gray-600);margin-bottom:8px">
+          Saya menyatakan bahwa pemeriksaan, diagnosis, pengukuran, perbaikan, dan final test telah dilakukan sesuai data yang dicatat dalam sistem.
+        </div>
+        <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px">👆 Gambar tanda tangan dengan jari (HP) atau klik-tahan mouse (laptop) di kotak putih di bawah ini</div>
+        <div style="position:relative">
+          <canvas id="sigTeknisi" width="400" height="150" style="width:100%;height:150px;border:1.5px dashed var(--blue);border-radius:8px;touch-action:none;background:var(--sky);display:block"></canvas>
+          <div id="sigTeknisiHint" style="position:absolute;top:0;left:0;width:100%;height:150px;display:flex;align-items:center;justify-content:center;color:var(--blue);font-size:13px;font-weight:600;pointer-events:none">✍️ Tanda tangan di sini</div>
+        </div>
+        <button class="btn-ghost btn" style="margin-top:8px" onclick="clearSignature('sigTeknisi')">Hapus & Ulangi</button>
+        <div style="text-align:center;margin-top:6px">
+          <a href="#" onclick="toggleTextFallback('sigTeknisi', event)" style="font-size:11.5px;color:var(--gray-600);text-decoration:underline">Tidak bisa gambar di HP ini? Ketik nama saja</a>
+        </div>
+        <div id="sigTeknisiTextWrap" style="display:none;margin-top:8px">
+          <input class="form-input" id="sigTeknisiText" placeholder="Ketik nama lengkap sebagai tanda tangan" style="font-family:cursive;font-style:italic;font-size:18px">
+        </div>
+      </div>
+      <div class="section-label">Tanda Tangan Customer / PIC</div>
+      <div class="card">
+        <div class="form-group"><label class="form-label">Nama Customer / PIC</label><input class="form-input" id="ttdNamaCustomer"></div>
+        <div style="font-size:12px;color:var(--gray-600);margin:8px 0">
+          Saya telah menerima penjelasan mengenai kondisi unit, diagnosis, tindakan yang dilakukan, sparepart yang digunakan, hasil pekerjaan, garansi, serta rekomendasi teknisi.
+        </div>
+        <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px">👆 Minta customer gambar tanda tangan di kotak putih ini</div>
+        <div style="position:relative">
+          <canvas id="sigCustomer" width="400" height="150" style="width:100%;height:150px;border:1.5px dashed var(--blue);border-radius:8px;touch-action:none;background:var(--sky);display:block"></canvas>
+          <div id="sigCustomerHint" style="position:absolute;top:0;left:0;width:100%;height:150px;display:flex;align-items:center;justify-content:center;color:var(--blue);font-size:13px;font-weight:600;pointer-events:none">✍️ Tanda tangan di sini</div>
+        </div>
+        <button class="btn-ghost btn" style="margin-top:8px" onclick="clearSignature('sigCustomer')">Hapus & Ulangi</button>
+        <div style="text-align:center;margin-top:6px">
+          <a href="#" onclick="toggleTextFallback('sigCustomer', event)" style="font-size:11.5px;color:var(--gray-600);text-decoration:underline">Tidak bisa gambar di HP ini? Ketik nama saja</a>
+        </div>
+        <div id="sigCustomerTextWrap" style="display:none;margin-top:8px">
+          <input class="form-input" id="sigCustomerText" placeholder="Ketik nama lengkap sebagai tanda tangan" style="font-family:cursive;font-style:italic;font-size:18px">
+        </div>
+      </div>
+    </div>
+    <div class="fab-bar"><button class="btn btn-primary" onclick="submitTandaTangan()">Simpan & Selesai</button></div>
+  </div>
+
+  <!-- ══ STEP SELESAI ══ -->
+  <div class="step" id="stepDone">
+    <div class="app-header">
+      <div class="header-top">
+        <button class="btn-back" onclick="backToLoad()">←</button>
+        <div><div class="header-title">Ringkasan Kelengkapan</div><div class="header-sub" id="doneNomorWO"></div></div>
+      </div>
+    </div>
+    <div class="content" id="doneContent"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="auth.js"></script>
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxjdx0xB0Bi-McWDOBTgAgc-ul2wKr2M_ezZhB3Lf3O17EgJthzaR1WoHElYroPMs-cVQ/exec';
+let W = { woId: null, data: null, adaTemuan: null }; // workflow state
+
+const JOB_STATUS_LABEL = {
+  DRAFT: 'Draft', DIJADWALKAN: 'Dijadwalkan', DALAM_PERJALANAN: 'Dalam Perjalanan',
+  TIBA_DI_LOKASI: 'Tiba di Lokasi', PEMERIKSAAN_AWAL: 'Pemeriksaan Awal',
+  MENUNGGU_PERSETUJUAN: 'Menunggu Persetujuan', DALAM_PERBAIKAN: 'Dalam Perbaikan',
+  MENUNGGU_FINAL_TEST: 'Menunggu Final Test', SELESAI: 'Selesai',
+  PERLU_KUNJUNGAN_LANJUTAN: 'Perlu Kunjungan Lanjutan', DITUNDA: 'Ditunda',
+  DIBATALKAN: 'Dibatalkan', KOMPLAIN: 'Komplain', REDO: 'Redo', DITUTUP: 'Ditutup',
+};
+function jobBadgeClass(s) {
+  if (s === 'SELESAI' || s === 'DITUTUP') return 'job-badge-done';
+  if (s === 'DRAFT') return 'job-badge-draft';
+  return 'job-badge-progress';
+}
+
+async function renderPekerjaanSaya(user) {
+  const container = document.getElementById('pekerjaanSayaList');
+  if (!user || (user.roleId !== 'ROLE-TEKNISI' && user.roleId !== 'ROLE-HELPER')) {
+    container.innerHTML = '<div class="empty-state">Login sebagai Teknisi/Helper untuk lihat daftar pekerjaan</div>';
+    return;
+  }
+  container.innerHTML = '<div class="empty-state">Memuat...</div>';
+  const r = await gasGet('listWO', { teknisiId: user.userId });
+  if (!r.success) { container.innerHTML = `<div class="empty-state">${r.error}</div>`; return; }
+  const aktif = r.data.filter(w => !['DITUTUP','DIBATALKAN'].includes(w.Status_WO));
+  if (!aktif.length) { container.innerHTML = '<div class="empty-state">Belum ada pekerjaan yang ditugaskan ke Anda</div>'; return; }
+  container.innerHTML = aktif.slice(0, 20).map(w => `
+    <button type="button" class="job-item" style="width:100%;background:white;border:1px solid var(--gray-200)" onclick="bukaDariPekerjaanSaya('${w.WO_ID}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="job-name">${escapeHtml(w.customerNama || '-')}</div>
+          <div class="job-meta">${escapeHtml(w.Jenis_Pekerjaan_ID)} · ${escapeHtml(w.Nomor_WO || w.WO_ID)}</div>
+        </div>
+        <span class="job-badge ${jobBadgeClass(w.Status_WO)}">${JOB_STATUS_LABEL[w.Status_WO] || w.Status_WO}</span>
+      </div>
+      <div class="job-meta" style="margin-top:4px">${escapeHtml(String(w.Tanggal_WO).slice(0,10))}</div>
+    </button>
+  `).join('');
+}
+function bukaDariPekerjaanSaya(woId) {
+  document.getElementById('loadWoId').value = woId;
+  loadWO();
+}
+
+async function gasGet(action, params) {
+  const url = new URL(GAS_URL);
+  url.searchParams.set('action', action);
+  Object.entries(params || {}).forEach(([k, v]) => { if (v !== undefined && v !== null) url.searchParams.set(k, v); });
+  const res = await fetch(url.toString());
+  return res.json();
+}
+async function gasPost(action, payload) {
+  const res = await fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action }, payload)) });
+  return res.json();
+}
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function backToLoad() {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('stepLoad').classList.add('active');
+}
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  if (n === 1) renderPemeriksaan();
+  if (n === 2) renderKeluhan();
+  if (n === 3) renderRunningTest();
+  if (n === 4) { renderParameter('paramAwalContent', 'AWAL'); renderTemuanToggle(); }
+  if (n === 7) renderRepairEntries();
+  if (n === 8) renderSparepartEntries();
+  if (n === 9) renderParameter('paramAkhirContent', 'AKHIR');
+  if (n === 10) renderFinalTestChecklist();
+  if (n === 12) { initSignaturePad('sigTeknisi'); initSignaturePad('sigCustomer'); }
+}
+
+// Untuk pekerjaan CLEANING, tampilkan pilihan "Ada temuan?" — kalau Tidak
+// (default), langkah 5-8 (Diagnosis/Persetujuan/Perbaikan/Sparepart)
+// otomatis dilewati begitu klik Simpan & Lanjut di halaman ini.
+function renderTemuanToggle() {
+  const card = document.getElementById('temuanToggleCard');
+  const isCleaning = W.data.wo.Jenis_Pekerjaan_ID === 'CLEANING';
+  card.style.display = isCleaning ? 'block' : 'none';
+  if (isCleaning && W.adaTemuan === null) setAdaTemuan(false); // default: tidak ada temuan
+  if (!isCleaning) W.adaTemuan = true; // jenis pekerjaan lain selalu lewati semua bagian
+}
+function setAdaTemuan(val) {
+  W.adaTemuan = val;
+  document.getElementById('btnTemuanTidak').style.cssText = val
+    ? 'flex:1;margin:0;padding:9px;background:white;color:var(--navy);border:1.5px solid var(--navy)'
+    : 'flex:1;margin:0;padding:9px;background:var(--blue);color:white';
+  document.getElementById('btnTemuanYa').style.cssText = val
+    ? 'flex:1;margin:0;padding:9px;background:var(--blue);color:white'
+    : 'flex:1;margin:0;padding:9px;background:white;color:var(--navy);border:1.5px solid var(--navy)';
+}
+
+// ═══════════ LOAD WO ═══════════
+async function loadWO() {
+  const woId = document.getElementById('loadWoId').value.trim();
+  if (!woId) { showToast('Masukkan WO_ID dulu'); return; }
+  document.getElementById('loadStatus').innerHTML = '<span class="spinner" style="border-top-color:var(--blue);border-color:rgba(44,106,160,0.3)"></span> Memuat...';
+  const r = await gasGet('getWOWorkflowData', { woId });
+  if (!r.success) { document.getElementById('loadStatus').innerHTML = `<div style="color:var(--red)">${r.error}</div>`; return; }
+  W.woId = woId; W.data = r.data;
+  document.getElementById('loadStatus').innerHTML = '';
+  renderRingkasan();
+  goStep(0);
+}
+
+function renderRingkasan() {
+  const d = W.data;
+  document.getElementById('sumNomorWO').textContent = d.wo.Nomor_WO || d.wo.WO_ID;
+  const unit = d.units[0];
+  const isCleaning = d.wo.Jenis_Pekerjaan_ID === 'CLEANING';
+  document.getElementById('ringkasanContent').innerHTML = `
+    <div class="card" style="background:var(--sky);border-color:var(--sky)">
+      <div style="font-size:11px;font-weight:700;color:var(--blue)">CUSTOMER</div>
+      <div style="font-weight:700;color:var(--navy);margin-bottom:8px">${escapeHtml(d.customer?.Nama_Customer)}</div>
+      <div style="font-size:11px;font-weight:700;color:var(--blue)">UNIT</div>
+      <div style="font-weight:700;color:var(--navy)">${unit ? escapeHtml(unit.Jenis_Unit_ID) + (unit.Merk ? ' — ' + escapeHtml(unit.Merk) : '') : 'Tanpa unit spesifik'}</div>
+    </div>
+    <div class="section-label">Detail Pekerjaan</div>
+    <div class="card">
+      <div style="font-size:13px">Jenis: <b>${escapeHtml(d.wo.Jenis_Pekerjaan_ID)}</b></div>
+      <div style="font-size:13px">Teknisi: ${escapeHtml(d.teknisiUtama?.Nama || '-')}${d.helper ? ' + ' + escapeHtml(d.helper.Nama) : ''}</div>
+      <div style="font-size:13px">Status: ${escapeHtml(d.wo.Status_WO)}</div>
+    </div>
+    ${isCleaning ? `
+    <div class="section-label">Layanan Tambahan</div>
+    <div class="card" id="layananTambahanCard">
+      <div style="font-size:13px;margin-bottom:8px">🧴 Cleaning Fresh + Disinfektan: <b id="statusDisinfektan">${d.wo.Layanan_Tambahan === 'Disinfektan' ? 'Sudah Dipesan' : 'Belum Dipesan'}</b></div>
+      <button class="btn ${d.wo.Layanan_Tambahan === 'Disinfektan' ? 'btn-secondary' : 'btn-primary'}" id="btnToggleDisinfektan" style="margin:0" onclick="toggleDisinfektanOnSite()">
+        ${d.wo.Layanan_Tambahan === 'Disinfektan' ? 'Batalkan Disinfektan' : '🧴 Tawarkan & Tambahkan Disinfektan'}
+      </button>
+    </div>` : ''}
+  `;
+}
+
+async function toggleDisinfektanOnSite() {
+  const sedangAktif = W.data.wo.Layanan_Tambahan === 'Disinfektan';
+  const nilaiBaru = sedangAktif ? '' : 'Disinfektan';
+  const r = await gasPost('updateLayananTambahan', { woId: W.woId, layananTambahan: nilaiBaru });
+  if (!r.success) { showToast('Gagal: ' + r.error); return; }
+  W.data.wo.Layanan_Tambahan = nilaiBaru;
+  showToast(sedangAktif ? 'Disinfektan dibatalkan' : '✅ Disinfektan ditambahkan ke WO ini');
+  renderRingkasan();
+}
+
+// ═══════════ 1. PEMERIKSAAN AWAL ═══════════
+function renderPemeriksaan() {
+  const groups = {};
+  W.data.masterPemeriksaan.forEach(p => { (groups[p.Kelompok] = groups[p.Kelompok] || []).push(p); });
+  document.getElementById('pemeriksaanContent').innerHTML = Object.keys(groups).map(kel => `
+    <div class="section-label">${escapeHtml(kel)}</div>
+    <div class="card">
+      ${groups[kel].map(p => {
+        const opsi = p.Tipe_Cek === 'ADA_TIDAK'
+          ? `<option value="TIDAK_ADA">Tidak Ada</option><option value="ADA">Ada</option><option value="TIDAK_DIPERIKSA">Tidak Diperiksa</option>`
+          : `<option value="SESUAI">Sesuai</option><option value="PERLU_PERHATIAN">Perlu Perhatian</option><option value="TIDAK_SESUAI">Tidak Sesuai</option><option value="TIDAK_DIPERIKSA">Tidak Diperiksa</option><option value="TIDAK_TERSEDIA">Tidak Tersedia</option>`;
+        return `
+        <div class="checklist-item">
+          <div class="checklist-name">${escapeHtml(p.Nama_Item)}</div>
+          <select class="checklist-select" id="pem_${p.Pemeriksaan_ID}">${opsi}</select>
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+}
+async function submitPemeriksaan() {
+  const items = W.data.masterPemeriksaan.map(p => ({
+    pemeriksaanId: p.Pemeriksaan_ID,
+    status: document.getElementById('pem_' + p.Pemeriksaan_ID).value,
+  }));
+  const r = await gasPost('savePemeriksaanAwal', { woId: W.woId, teknisiId: W.data.wo.Teknisi_Utama_ID, items });
+  if (!r.success) { showToast('Gagal: ' + r.error); return; }
+  showToast('✅ Pemeriksaan awal tersimpan');
+  goStep(2);
+}
+
+// ═══════════ 2. KELUHAN CUSTOMER ═══════════
+let _keluhanSelected = new Set();
+function renderKeluhan() {
+  document.getElementById('keluhanChips').innerHTML = W.data.masterKeluhan.map(k => `
+    <div class="chip ${_keluhanSelected.has(k.Keluhan_Kode) ? 'selected' : ''}" onclick="toggleKeluhan('${k.Keluhan_Kode}', this)">${escapeHtml(k.Nama_Keluhan)}</div>
+  `).join('');
+}
+function toggleKeluhan(kode, el) {
+  if (_keluhanSelected.has(kode)) { _keluhanSelected.delete(kode); el.classList.remove('selected'); }
+  else { _keluhanSelected.add(kode); el.classList.add('selected'); }
+}
+async function submitKeluhan() {
+  if (!_keluhanSelected.size) { showToast('Pilih minimal 1 keluhan'); return; }
+  const r = await gasPost('saveKeluhanCustomer', {
+    woId: W.woId, keluhanCodes: Array.from(_keluhanSelected),
+    deskripsi: document.getElementById('keluhanDeskripsi').value,
+    waktuMulai: document.getElementById('keluhanWaktu').value,
+    frekuensi: document.getElementById('keluhanFrekuensi').value,
+    riwayatService: document.getElementById('keluhanRiwayat').value,
+  });
+  if (!r.success) { showToast('Gagal: ' + r.error); return; }
+  showToast('✅ Keluhan tersimpan');
+  goStep(3);
+}
+
+// ═══════════ 3. RUNNING TEST ═══════════
+function toggleAlasanTidakAman() {
+  document.getElementById('rtAlasanWrap').style.display = document.getElementById('rtStatus').value === 'TIDAK_AMAN_DIJALANKAN' ? 'block' : 'none';
+}
+function renderRunningTest() {
+  document.getElementById('runningTestChecklist').innerHTML = W.data.masterRunningTest.map(r => `
+    <div class="checklist-item">
+      <div class="checklist-name">${escapeHtml(r.Nama_Item)}</div>
+      <select class="checklist-select" id="rt_${r.RunningTestItem_ID}">
+        <option value="NORMAL">Normal</option><option value="ABNORMAL">Abnormal</option><option value="TIDAK_BERLAKU">Tidak Berlaku</option>
+      </select>
+    </div>
+  `).join('');
+}
+async function submitRunningTest() {
+  const status = document.getElementById('rtStatus').value;
+  const alasan = document.getElementById('rtAlasan').value;
+  if (status === 'TIDAK_AMAN_DIJALANKAN' && !alasan) { showToast('Alasan wajib diisi'); return; }
+  const checklist = {};
+  W.data.masterRunningTest.forEach(r => { checklist[r.RunningTestItem_ID] = document.getElementById('rt_' + r.RunningTestItem_ID).value; });
+  const r = await gasPost('saveRunningTest', { woId: W.woId, tahap: 'AWAL', statusRunningTest: status, checklist, alasanTidakAman: alasan, teknisiId: W.data.wo.Teknisi_Utama_ID });
+  if (!r.success) { showToast('Gagal: ' + r.error); return; }
+  showToast('✅ Running test tersimpan');
+  goStep(4);
+}
+
+// ═══════════ 4 & 9. PARAMETER (AWAL/AKHIR) ═══════════
+function renderParameter(containerId, tahap) {
+  const params = W.data.parameterAwal;
+  const container = document.getElementById(containerId);
+  if (!params.length) { container.innerHTML = '<div class="empty-state">Tidak ada parameter terdaftar untuk unit/jenis pekerjaan ini.</div>'; return; }
+  container.innerHTML = params.map(p => `
+    <div class="param-row">
+      <div class="param-name">${escapeHtml(p.Nama_Parameter)}</div>
+      <div class="param-standar">Standar: ${escapeHtml(p.Standar_Text || (p.Standar_Min || p.Standar_Max ? p.Standar_Min + ' – ' + p.Standar_Max : 'belum ditetapkan'))} ${p.Satuan ? '(' + p.Satuan + ')' : ''}</div>
+      <div class="param-input-row">
+        <input class="form-input" id="param_${tahap}_${p.Parameter_ID}" placeholder="${p.Tipe_Input === 'NUMBER' ? 'Nilai angka' : 'Nilai'}"
+          type="${p.Tipe_Input === 'NUMBER' ? 'number' : 'text'}" style="flex:1">
+      </div>
+    </div>
+  `).join('');
+  setupDeltaTAutoCalc(params, tahap);
+}
+
+// Delta T (ΔT) dihitung otomatis = |Suhu Keluar - Suhu Masuk|, supaya
+// teknisi tidak perlu hitung manual. Berlaku untuk pasangan parameter mana
+// pun dalam satu daftar yang namanya mengandung "masuk" & "keluar" dengan
+// objek yang sama (mis. "evaporator", "kondensor").
+function setupDeltaTAutoCalc(params, tahap) {
+  const deltaParams = params.filter(p => /delta\s*t|Δt/i.test(p.Nama_Parameter));
+  deltaParams.forEach(dp => {
+    // cari kata kunci objek dari nama delta T, mis. "Delta T (ΔT) evaporator" -> "evaporator"
+    const objekMatch = dp.Nama_Parameter.match(/delta\s*t\s*(\(Δt\))?\s*(.*)$/i);
+    const objek = (objekMatch && objekMatch[2] || '').trim().toLowerCase();
+    const masukParam = params.find(p => /masuk/i.test(p.Nama_Parameter) && (!objek || p.Nama_Parameter.toLowerCase().includes(objek)));
+    const keluarParam = params.find(p => /keluar/i.test(p.Nama_Parameter) && (!objek || p.Nama_Parameter.toLowerCase().includes(objek)));
+    if (!masukParam || !keluarParam) return;
+
+    const deltaInput = document.getElementById('param_' + tahap + '_' + dp.Parameter_ID);
+    const masukInput = document.getElementById('param_' + tahap + '_' + masukParam.Parameter_ID);
+    const keluarInput = document.getElementById('param_' + tahap + '_' + keluarParam.Parameter_ID);
+    if (!deltaInput || !masukInput || !keluarInput) return;
+
+    deltaInput.readOnly = true;
+    deltaInput.style.background = 'var(--gray-100)';
+    deltaInput.placeholder = 'Otomatis dari suhu masuk/keluar';
+    function hitung() {
+      const m = parseFloat(masukInput.value), k = parseFloat(keluarInput.value);
+      if (!isNaN(m) && !isNaN(k)) deltaInput.value = Math.abs(k - m).toFixed(1);
+    }
+    masukInput.addEventListener('input', hitung);
+    keluarInput.addEventListener('input', hitung);
+  });
+}
+async function submitParameter(tahap, nextStep) {
+  const params = W.data.parameterAwal;
+  const values = params.map(p => {
+    const el = document.getElementById('param_' + tahap + '_' + p.Parameter_ID);
+    const val = el ? el.value : '';
+    return p.Tipe_Input === 'NUMBER'
+      ? { parameterId: p.Parameter_ID, nilaiAngka: val === '' ? undefined : Number(val) }
+      : { parameterId: p.Parameter_ID, nilaiText: val };
+  }).filter(v => v.nilaiAngka !== undefined || (v.nilaiText && v.nilaiText !== ''));
+
+  if (!values.length) { showToast('Isi minimal 1 parameter, atau lewati kalau memang tidak ada'); goStep(nextStep); return; }
+
+  const unit = W.data.units[0];
+  const r = await gasPost('saveHasilPengukuran', { woId: W.woId, unitId: unit ? unit.Unit_ID : '', tahap, values, teknisiId: W.data.wo.Teknisi_Utama_ID });
+  if (!r.success) { showToast('Gagal: ' + r.error); return; }
+  showToast('✅ Parameter ' + tahap.toLowerCase() + ' tersimpan');
+  goStep(nextStep);
+}
+
+// Khusus Parameter Awal: tentukan lompat ke Diagnosis (step 5) atau
+// langsung ke Parameter Akhir (step 9) berdasarkan pilihan "Ada temuan?".
+async function submitParameterAwal() {
+  const nextStep = W.adaTemuan ? 5 : 9;
+  await submitParameter('AWAL', nextStep);
+  if (!W.adaTemuan) showToast('✅ Parameter awal tersimpan — melewati Diagnosis/Perbaikan/Sparepart (tidak ada temuan)');
+}
+
+// ═══════════ 5. DIAGNOSIS ═══════════
+async function submitDiagnosis() {
+  const r = await gasPost('saveDiagnosis', {
+    woId: W.woId, teknisiId: W.data.wo.Teknisi_Utama_ID,
+    temuanTeknisi: document.getElementById('dgTemuan').value,
+    analisaPenyebab: document.getElementById('dgAnalisa').value,
+    akarPenyebab: document.getElementById('dgAkar').value,
+    komponenBermasalah: document.getElementById('dgKomponen').value,
+    tingkatKerusakan: document.getElementById('dgTingkatKerusakan').value,
+    tingkatRisiko: document.getElementById('dgTingkatRisiko').value,
+    rencanaTindakan: document.getElementById('dgRencana').value,
+    estimasiSparepart: document.getElementById('dgEstSparepart').value,
+    estimasiDurasi: document.getElementById('dgEstDurasi').value,
+  });
+  if (!r.success) { showToast('Gagal: ' + r.error); return; }
+  showToast('✅ Diagnosis tersimpan');
+  goStep(6);
+}
+
+// ═══════════ 6. PERSETUJUAN CUSTOMER ═══════════
+async function submitPersetujuan() {
+  const r = await gasPost('savePersetujuanCustomer', {
+    woId: W.woId,
+    statusPersetujuan: document.getElementById('psStatus').value,
+    tindakanDitawarkan: document.getElementById('psTindakanTawar').value,
+    tindakanDisetujui: document.getElementById('psTindakanSetuju').value,
+    estimasiWaktu: document.getElementById('psWaktu').value,
+    catatanCustomer: document.getElementById('psCatatan').value,
+    namaCustomerPIC: document.getElementById('psNamaPIC').value,
+  });
+  if (!r.success) { showToast('Gagal: ' + r.error); return; }
+  showToast('✅ Persetujuan tersimpan');
+  goStep(7);
+}
+
+// ═══════════ 7. HASIL PERBAIKAN ═══════════
+let _repairEntries = [];
+function addRepairEntry() { _repairEntries.push({ id: Date.now() }); renderRepairEntries(); }
+function removeRepairEntry(id) { _repairEntries = _repairEntries.filter(e => e.id !== id); renderRepairEntries(); }
+function renderRepairEntries() {
+  if (!_repairEntries.length) _repairEntries.push({ id: Date.now() });
+  const tindakanOpts = W.data.masterTindakan.map(t => `<option value="${t.Tindakan_ID}">${escapeHtml(t.Nama_Tindakan)}</option>`).join('');
+  document.getElementById('repairEntries').innerHTML = _repairEntries.map(e => `
+    <div class="repair-entry">
+      ${_repairEntries.length > 1 ? `<button class="entry-remove" onclick="removeRepairEntry(${e.id})">×</button>` : ''}
+      <div class="form-group"><label class="form-label">Tindakan</label>
+        <select class="form-select" id="rp_tindakan_${e.id}"><option value="">— Pilih —</option>${tindakanOpts}</select>
+      </div>
+      <div class="form-group"><label class="form-label">Area Pekerjaan</label><input class="form-input" id="rp_area_${e.id}"></div>
+      <div class="form-group"><label class="form-label">Hasil Tindakan</label><textarea class="form-textarea" id="rp_hasil_${e.id}"></textarea></div>
+      <div class="form-group"><label class="form-label">Durasi (menit)</label><input class="form-input" type="number" id="rp_durasi_${e.id}"></div>
+    </div>
+  `).join('');
+}
+async function submitPerbaikan() {
+  for (const e of _repairEntries) {
+    const tindakanId = document.getElementById('rp_tindakan_' + e.id).value;
+    if (!tindakanId) continue;
+    await gasPost('saveHasilPerbaikan', {
+      woId: W.woId, teknisiId: W.data.wo.Teknisi_Utama_ID, tindakanId,
+      areaPekerjaan: document.getElementById('rp_area_' + e.id).value,
+      hasilTindakan: document.getElementById('rp_hasil_' + e.id).value,
+      durasi: document.getElementById('rp_durasi_' + e.id).value,
+    });
+  }
+  showToast('✅ Hasil perbaikan tersimpan');
+  goStep(8);
+}
+
+// ═══════════ 8. SPAREPART ═══════════
+let _sparepartEntries = [];
+function addSparepartEntry() { _sparepartEntries.push({ id: Date.now() }); renderSparepartEntries(); }
+function removeSparepartEntry(id) { _sparepartEntries = _sparepartEntries.filter(e => e.id !== id); renderSparepartEntries(); }
+function renderSparepartEntries() {
+  document.getElementById('sparepartEntries').innerHTML = _sparepartEntries.map(e => `
+    <div class="sparepart-entry">
+      <button class="entry-remove" onclick="removeSparepartEntry(${e.id})">×</button>
+      <div class="form-group"><label class="form-label">Nama Sparepart</label><input class="form-input" id="sp_nama_${e.id}"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Qty</label><input class="form-input" type="number" id="sp_qty_${e.id}" value="1"></div>
+        <div class="form-group"><label class="form-label">Kondisi</label>
+          <select class="form-select" id="sp_kondisi_${e.id}"><option>BARU</option><option>REKONDISI</option><option>BEKAS_LAYAK</option><option>CUSTOMER_SUPPLY</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Harga Satuan (Rp)</label><input class="form-input" type="number" id="sp_harga_${e.id}"></div>
+    </div>
+  `).join('') || '<div class="empty-state">Belum ada sparepart ditambahkan</div>';
+}
+async function submitSparepart() {
+  const items = _sparepartEntries.map(e => ({
+    namaSparepart: document.getElementById('sp_nama_' + e.id)?.value,
+    qty: document.getElementById('sp_qty_' + e.id)?.value,
+    kondisi: document.getElementById('sp_kondisi_' + e.id)?.value,
+    hargaSatuan: document.getElementById('sp_harga_' + e.id)?.value,
+  })).filter(i => i.namaSparepart);
+  if (items.length) {
+    const r = await gasPost('saveSparepartUsage', { woId: W.woId, teknisiId: W.data.wo.Teknisi_Utama_ID, items });
+    if (!r.success) { showToast('Gagal: ' + r.error); return; }
+  }
+  showToast('✅ Sparepart tersimpan');
+  goStep(9);
+}
+
+// ═══════════ 10. FINAL TEST + REKOMENDASI ═══════════
+function renderFinalTestChecklist() {
+  document.getElementById('finalTestChecklist').innerHTML = W.data.masterFinalTest.map(f => `
+    <div class="checklist-item">
+      <div class="checklist-name">${escapeHtml(f.Nama_Item)}</div>
+      <select class="checklist-select" id="ft_${f.FinalTestItem_ID}">
+        <option value="OK">OK</option><option value="TIDAK_OK">Tidak OK</option><option value="TIDAK_BERLAKU">Tidak Berlaku</option>
+      </select>
+    </div>
+  `).join('');
+}
+async function submitFinalTestDanRekomendasi() {
+  const checklist = {};
+  W.data.masterFinalTest.forEach(f => { checklist[f.FinalTestItem_ID] = document.getElementById('ft_' + f.FinalTestItem_ID).value; });
+  const rFT = await gasPost('saveFinalTest', {
+    woId: W.woId, teknisiId: W.data.wo.Teknisi_Utama_ID, checklist,
+    statusFinalTest: document.getElementById('ftStatus').value, catatan: document.getElementById('ftCatatan').value,
+  });
+  if (!rFT.success) { showToast('Gagal simpan final test: ' + rFT.error); return; }
+
+  const kondisiUnit = document.getElementById('rkKondisi').value;
+  const rRK = await gasPost('saveRekomendasi', {
+    woId: W.woId, teknisiId: W.data.wo.Teknisi_Utama_ID, kondisiUnit,
+    rekomendasiTindakan: document.getElementById('rkTindakan').value,
+    rekomendasiWaktuService: document.getElementById('rkWaktuService').value,
+    estimasiUmurPakai: document.getElementById('rkUmurPakai').value,
+    catatanPenggunaan: document.getElementById('rkCatatanPenggunaan').value,
+    risikoJikaTidakDitindaklanjuti: document.getElementById('rkRisiko').value,
+  });
+  if (!rRK.success) { showToast('Gagal simpan rekomendasi: ' + rRK.error); return; }
+
+  showToast('✅ Final test & rekomendasi tersimpan');
+  goStep(11);
+}
+
+async function tampilkanKelengkapan() {
+  const r = await gasGet('checkKelengkapanWO', { woId: W.woId });
+  document.getElementById('doneNomorWO').textContent = W.data.wo.Nomor_WO || W.woId;
+  if (!r.success) { document.getElementById('doneContent').innerHTML = `<div class="empty-state">${r.error}</div>`; goStepRaw('stepDone'); return; }
+
+  document.getElementById('doneContent').innerHTML = r.lengkap
+    ? `<div class="card" style="background:var(--green-light);border-color:var(--green-light)">
+        <div style="font-weight:700;color:var(--green);font-size:15px">✅ Semua bagian wajib sudah lengkap!</div>
+        <div style="font-size:12.5px;color:var(--gray-600);margin-top:6px">WO ini sudah bisa diselesaikan.</div>
+        <button class="btn btn-primary" style="margin-top:12px" onclick="doSelesaikanWO()">Tandai SELESAI</button>
+        <button class="btn btn-secondary" style="margin-top:8px" onclick="window.open('laporan.html?wo=${W.woId}', '_blank')">📄 Buka Laporan PDF</button>
+      </div>`
+    : `<div class="card" style="background:var(--orange-light);border-color:var(--orange-light)">
+        <div style="font-weight:700;color:var(--orange);font-size:15px">⚠ Masih ada bagian yang belum lengkap</div>
+        <div style="margin-top:8px">${r.missing.map(m => `<span class="badge-missing">${escapeHtml(m)}</span>`).join('')}</div>
+      </div>`;
+  goStepRaw('stepDone');
+}
+async function doSelesaikanWO() {
+  const r = await gasPost('selesaikanWO', { woId: W.woId, changedBy: W.data.wo.Teknisi_Utama_ID });
+  if (!r.success) { showToast('Gagal: ' + r.error); return; }
+  showToast('✅ Work Order ditandai SELESAI');
+}
+function goStepRaw(id) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ═══════════ 11. DOKUMENTASI ═══════════
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+const DOC_SLOTS = [
+  { id: 'doc_depan', kategori: 'Sebelum Pekerjaan', jenis: 'Foto Tampak Depan Unit' },
+  { id: 'doc_nameplate', kategori: 'Sebelum Pekerjaan', jenis: 'Foto Nameplate' },
+  { id: 'doc_kondisi_awal', kategori: 'Sebelum Pekerjaan', jenis: 'Foto Kondisi Awal' },
+  { id: 'doc_area_keluhan', kategori: 'Sebelum Pekerjaan', jenis: 'Foto Area Keluhan' },
+  { id: 'doc_unit_selesai', kategori: 'Setelah Pekerjaan', jenis: 'Foto Unit Selesai' },
+  { id: 'doc_area_kerja', kategori: 'Setelah Pekerjaan', jenis: 'Foto Area Kerja' },
+  { id: 'doc_hasil_akhir', kategori: 'Setelah Pekerjaan', jenis: 'Foto Hasil Akhir' },
+  { id: 'doc_temuan', kategori: 'Saat Pekerjaan', jenis: 'Foto Temuan / Komponen Rusak' },
+  { id: 'doc_sparepart_lama', kategori: 'Saat Pekerjaan', jenis: 'Foto Sparepart Lama' },
+  { id: 'doc_sparepart_baru', kategori: 'Saat Pekerjaan', jenis: 'Foto Sparepart Baru' },
+];
+async function submitDokumentasi() {
+  const toUpload = DOC_SLOTS.filter(s => document.getElementById(s.id).files.length > 0);
+  if (!toUpload.length) { showToast('Belum ada foto dipilih — lewati kalau memang belum ada'); goStep(12); return; }
+
+  const btn = document.getElementById('btnUploadDok');
+  btn.disabled = true;
+  let done = 0;
+  for (const slot of toUpload) {
+    const file = document.getElementById(slot.id).files[0];
+    document.getElementById('uploadProgress').textContent = `Mengunggah ${slot.jenis} (${done+1}/${toUpload.length})...`;
+    const base64 = await fileToBase64(file);
+    const r = await gasPost('uploadDokumentasi', {
+      woId: W.woId, kategori: slot.kategori, jenisDokumentasi: slot.jenis,
+      fileBase64: base64, fileName: slot.id + '_' + Date.now() + '.jpg', mimeType: file.type || 'image/jpeg',
+      uploadedBy: W.data.wo.Teknisi_Utama_ID,
+    });
+    if (!r.success) { showToast('Gagal upload ' + slot.jenis + ': ' + r.error); btn.disabled = false; return; }
+    done++;
+  }
+  document.getElementById('uploadProgress').textContent = '';
+  btn.disabled = false;
+  showToast('✅ ' + done + ' foto berhasil diunggah');
+  goStep(12);
+}
+
+// ═══════════ 12. TANDA TANGAN (signature pad) ═══════════
+const _sigPads = {};
+function initSignaturePad(canvasId) {
+  if (_sigPads[canvasId]) return; // sudah pernah di-init, jangan ulangi (resize canvas akan menghapus gambar)
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * ratio;
+  canvas.height = canvas.clientHeight * ratio;
+  ctx.scale(ratio, ratio);
+  ctx.strokeStyle = '#1A3557'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  let drawing = false;
+  const hint = document.getElementById(canvasId + 'Hint');
+
+  function pos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  }
+  function start(e) {
+    drawing = true; canvas.dataset.drawn = '1';
+    if (hint) hint.style.display = 'none';
+    // Kunci semua event pointer berikutnya ke canvas ini — penting supaya
+    // gerakan jari yang keluar sedikit dari kotak tetap kebaca (umum di HP).
+    try { canvas.setPointerCapture(e.pointerId); } catch(err) {}
+    const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y);
+    e.preventDefault();
+  }
+  function move(e) {
+    if (!drawing) return;
+    const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke();
+    e.preventDefault();
+  }
+  function end(e) { drawing = false; }
+
+  // Pointer Events (menyatukan mouse, touch/jari, dan stylus dalam satu API) —
+  // jauh lebih konsisten di berbagai browser HP dibanding touch/mouse terpisah.
+  canvas.addEventListener('pointerdown', start, { passive: false });
+  canvas.addEventListener('pointermove', move, { passive: false });
+  canvas.addEventListener('pointerup', end, { passive: false });
+  canvas.addEventListener('pointercancel', end, { passive: false });
+  canvas.addEventListener('pointerleave', end, { passive: false });
+
+  _sigPads[canvasId] = { canvas, ctx };
+}
+function clearSignature(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.dataset.drawn = '0';
+  const hint = document.getElementById(canvasId + 'Hint');
+  if (hint) hint.style.display = 'flex';
+}
+
+// Fallback: kalau HP tidak bisa gambar sama sekali, teknisi/customer bisa
+// ketik nama sebagai tanda tangan (dirender sebagai teks bergaya cursive).
+function toggleTextFallback(canvasId, evt) {
+  evt.preventDefault();
+  const wrap = document.getElementById(canvasId + 'TextWrap');
+  const isShowing = wrap.style.display !== 'none';
+  wrap.style.display = isShowing ? 'none' : 'block';
+  if (!isShowing) clearSignature(canvasId); // reset gambar kalau pindah ke mode teks
+}
+
+// Ubah gambar tanda tangan (canvas) MENJADI base64 PNG untuk dikirim ke
+// server. Kalau pakai mode teks fallback, gambar teks itu ke canvas
+// sementara supaya format datanya tetap sama (PNG) — tidak perlu ubah backend.
+function getSignatureDataUrl(canvasId) {
+  const textWrap = document.getElementById(canvasId + 'TextWrap');
+  const usingText = textWrap.style.display !== 'none';
+  if (usingText) {
+    const nama = document.getElementById(canvasId + 'Text').value.trim();
+    if (!nama) return null;
+    const tmp = document.createElement('canvas');
+    tmp.width = 400; tmp.height = 150;
+    const tctx = tmp.getContext('2d');
+    tctx.fillStyle = '#F8FAFC'; tctx.fillRect(0, 0, 400, 150);
+    tctx.fillStyle = '#1A3557'; tctx.font = 'italic 32px cursive';
+    tctx.textAlign = 'center'; tctx.textBaseline = 'middle';
+    tctx.fillText(nama, 200, 75);
+    return tmp.toDataURL('image/png');
+  }
+  const canvas = document.getElementById(canvasId);
+  if (canvas.dataset.drawn !== '1') return null;
+  return canvas.toDataURL('image/png');
+}
+async function submitTandaTangan() {
+  const namaCustomer = document.getElementById('ttdNamaCustomer').value.trim();
+  if (!namaCustomer) { showToast('Nama customer/PIC wajib diisi'); return; }
+
+  const dataTeknisi = getSignatureDataUrl('sigTeknisi');
+  if (!dataTeknisi) { showToast('Tanda tangan teknisi belum diisi (gambar atau ketik nama)'); return; }
+  const dataCustomer = getSignatureDataUrl('sigCustomer');
+  if (!dataCustomer) { showToast('Tanda tangan customer belum diisi (gambar atau ketik nama)'); return; }
+
+  const rT = await gasPost('saveTandaTangan', {
+    woId: W.woId, nama: W.data.teknisiUtama?.Nama || 'Teknisi', peran: 'Teknisi',
+    tandaTanganBase64: dataTeknisi.split(',')[1],
+  });
+  if (!rT.success) { showToast('Gagal simpan TTD teknisi: ' + rT.error); return; }
+
+  const rC = await gasPost('saveTandaTangan', {
+    woId: W.woId, nama: namaCustomer, peran: 'Customer',
+    tandaTanganBase64: dataCustomer.split(',')[1],
+  });
+  if (!rC.success) { showToast('Gagal simpan TTD customer: ' + rC.error); return; }
+
+  showToast('✅ Tanda tangan tersimpan');
+  await tampilkanKelengkapan();
+}
+
+// muat WO dari parameter URL kalau ada (?wo=WO-000001)
+Auth.requireLogin(['ROLE-TEKNISI', 'ROLE-HELPER', 'ROLE-SUPERVISOR', 'ROLE-OWNER']).then((user) => {
+  renderPekerjaanSaya(user);
+  const params = new URLSearchParams(window.location.search);
+  const wo = params.get('wo');
+  if (wo) { document.getElementById('loadWoId').value = wo; loadWO(); }
+});
+</script>
+</body>
+</html>
