@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>HCS-ISMS — Inventory</title>
+<style>
+:root {
+  --navy: #1A3557; --blue: #2C6AA0; --sky: #E8F2FB;
+  --green: #1D7A4A; --green-light: #E8F5EE;
+  --orange: #C0550A; --orange-light: #FDF0E8;
+  --red: #C0392B; --red-light: #FDEDEC;
+  --gray-50: #F8FAFC; --gray-100: #F1F5F9; --gray-200: #E2E8F0;
+  --gray-400: #94A3B8; --gray-600: #475569; --gray-800: #1E293B;
+  --radius: 12px; --radius-sm: 8px; --shadow: 0 2px 12px rgba(26,53,87,0.10);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--gray-100); color: var(--gray-800); min-height: 100vh; font-size: 14px; }
+#app { max-width: 480px; margin: 0 auto; min-height: 100vh; background: white; }
+.app-header { background: var(--navy); color: white; padding: 14px 18px; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 10px; }
+.back-btn { background: rgba(255,255,255,0.15); border: none; color: white; width: 34px; height: 34px; border-radius: 8px; font-size: 18px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.back-btn:active { background: rgba(255,255,255,0.28); }
+.header-title { font-size: 16px; font-weight: 700; }
+.content { padding: 16px; }
+.card { background: white; border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+.section-label { font-size: 11px; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.4px; margin: 16px 0 8px; }
+.section-label:first-child { margin-top: 0; }
+.form-group { margin-bottom: 12px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-600); margin-bottom: 5px; }
+.form-input, .form-select { width: 100%; padding: 9px 11px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-size: 13px; }
+.form-row { display: flex; gap: 10px; }
+.form-row > .form-group { flex: 1; }
+.btn { display: block; width: 100%; padding: 12px; border-radius: 8px; border: none; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.btn-primary { background: var(--blue); color: white; }
+.btn-secondary { background: white; color: var(--navy); border: 1.5px solid var(--navy); }
+.item-row { border: 1px solid var(--gray-200); border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+.item-name { font-weight: 700; font-size: 13.5px; color: var(--navy); }
+.item-meta { font-size: 11.5px; color: var(--gray-600); margin-top: 2px; }
+.badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 10.5px; font-weight: 700; }
+.badge-aman { background: var(--green-light); color: var(--green); }
+.badge-reorder { background: var(--orange-light); color: var(--orange); }
+.badge-habis { background: var(--red-light); color: var(--red); }
+.empty-state { text-align: center; padding: 30px 20px; color: var(--gray-400); }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; align-items: flex-end; }
+.modal-overlay.show { display: flex; }
+.modal-box { background: white; border-radius: 16px 16px 0 0; padding: 20px 16px; width: 100%; max-width: 480px; margin: 0 auto; max-height: 85vh; overflow-y: auto; }
+.fab { position: fixed; bottom: 20px; right: calc(50% - 240px + 20px); background: var(--blue); color: white; width: 52px; height: 52px; border-radius: 50%; border: none; font-size: 24px; box-shadow: var(--shadow); cursor: pointer; z-index: 50; }
+@media (max-width: 520px) { .fab { right: 20px; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="app-header">
+    <button class="back-btn" onclick="goBack()" aria-label="Kembali">←</button>
+    <div class="header-title">📦 Inventory Sparepart</div>
+  </div>
+  <div class="content" id="content"><div class="empty-state">Memuat...</div></div>
+  <button class="fab" onclick="openAddModal()">+</button>
+</div>
+
+<div class="modal-overlay" id="addModal">
+  <div class="modal-box">
+    <div class="section-label">Tambah Sparepart Baru</div>
+    <div class="form-group"><label class="form-label">Nama Sparepart <span style="color:var(--red)">*</span></label><input class="form-input" id="newNama"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Part Number</label><input class="form-input" id="newPartNumber"></div>
+      <div class="form-group"><label class="form-label">Merk</label><input class="form-input" id="newMerk"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Satuan</label><input class="form-input" id="newSatuan" value="pcs"></div>
+      <div class="form-group"><label class="form-label">Harga Standar (Rp)</label><input class="form-input" type="number" id="newHarga"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Stok Awal</label><input class="form-input" type="number" id="newStokAwal" value="0"></div>
+      <div class="form-group"><label class="form-label">Stok Minimum</label><input class="form-input" type="number" id="newStokMin" value="0"></div>
+    </div>
+    <button class="btn btn-primary" onclick="submitAddSparepart()">Simpan</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="closeModal('addModal')">Batal</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="stokModal">
+  <div class="modal-box">
+    <div class="section-label" id="stokModalTitle">Tambah Stok Masuk</div>
+    <div class="form-group"><label class="form-label">Jumlah Masuk</label><input class="form-input" type="number" id="stokJumlah" placeholder="Contoh: 10"></div>
+    <button class="btn btn-primary" onclick="submitStokMasuk()">Simpan</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="closeModal('stokModal')">Batal</button>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbw_JHWESY0daowfQXifOcEE7MW-ZqSvnV0FWM6qKhE7srEOEbNOPiJlDhvCz1dAKH47/exec';
+let _selectedSparepartId = null;
+
+function goBack() {
+  if (window.history.length > 1) { window.history.back(); }
+  else { window.location.href = 'wo-form.html'; }
+}
+
+async function gasGet(action, params) {
+  const url = new URL(GAS_URL);
+  url.searchParams.set('action', action);
+  Object.entries(params || {}).forEach(([k, v]) => { if (v !== undefined && v !== null) url.searchParams.set(k, v); });
+  const res = await fetch(url.toString());
+  return res.json();
+}
+async function gasPost(action, payload) {
+  const res = await fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action }, payload)) });
+  return res.json();
+}
+function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function openAddModal() { document.getElementById('addModal').classList.add('show'); }
+function openStokModal(id, nama) {
+  _selectedSparepartId = id;
+  document.getElementById('stokModalTitle').textContent = 'Tambah Stok: ' + nama;
+  document.getElementById('stokJumlah').value = '';
+  document.getElementById('stokModal').classList.add('show');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+async function loadInventory() {
+  const content = document.getElementById('content');
+  content.innerHTML = '<div class="empty-state">Memuat...</div>';
+  const r = await gasGet('getInventoryList', {});
+  if (!r.success) { content.innerHTML = `<div class="empty-state">${r.error}</div>`; return; }
+  if (!r.data.length) { content.innerHTML = '<div class="empty-state">Belum ada sparepart terdaftar.<br>Tekan tombol + untuk menambahkan.</div>'; return; }
+
+  const badgeClass = { AMAN: 'badge-aman', REORDER: 'badge-reorder', HABIS: 'badge-habis' };
+  const badgeLabel = { AMAN: 'Aman', REORDER: 'Perlu Reorder', HABIS: 'Habis' };
+
+  content.innerHTML = `
+    <div class="section-label">${r.data.length} Sparepart Terdaftar</div>
+  ` + r.data.map(s => `
+    <div class="item-row">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="item-name">${escapeHtml(s.Nama_Sparepart)}</div>
+          <div class="item-meta">${escapeHtml(s.Part_Number || '-')} · ${escapeHtml(s.Merk || '-')}</div>
+        </div>
+        <span class="badge ${badgeClass[s.status]}">${badgeLabel[s.status]}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <div style="font-size:13px">Stok: <b>${s.Stok} ${escapeHtml(s.Satuan)}</b> (min. ${s.Stok_Minimum})</div>
+        <button class="btn btn-secondary" style="width:auto;padding:6px 12px;font-size:12px" onclick="openStokModal('${s.Sparepart_ID}', '${escapeHtml(s.Nama_Sparepart).replace(/'/g,"\\'")}')">+ Stok Masuk</button>
+      </div>
+      ${s.Harga_Standar ? `<div class="item-meta" style="margin-top:4px">Harga standar: Rp${Number(s.Harga_Standar).toLocaleString('id-ID')}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+async function submitAddSparepart() {
+  const nama = document.getElementById('newNama').value.trim();
+  if (!nama) { alert('Nama sparepart wajib diisi'); return; }
+  const r = await gasPost('createMasterSparepart', {
+    namaSparepart: nama,
+    partNumber: document.getElementById('newPartNumber').value,
+    merk: document.getElementById('newMerk').value,
+    satuan: document.getElementById('newSatuan').value || 'pcs',
+    hargaStandar: document.getElementById('newHarga').value,
+    stokAwal: document.getElementById('newStokAwal').value,
+    stokMinimum: document.getElementById('newStokMin').value,
+  });
+  if (!r.success) { alert('Gagal: ' + r.error); return; }
+  closeModal('addModal');
+  document.getElementById('newNama').value = ''; document.getElementById('newPartNumber').value = '';
+  document.getElementById('newMerk').value = ''; document.getElementById('newHarga').value = '';
+  document.getElementById('newStokAwal').value = '0'; document.getElementById('newStokMin').value = '0';
+  loadInventory();
+}
+
+async function submitStokMasuk() {
+  const jumlah = document.getElementById('stokJumlah').value;
+  if (!jumlah || Number(jumlah) <= 0) { alert('Jumlah wajib diisi angka positif'); return; }
+  const r = await gasPost('tambahStokMasuk', { sparepartId: _selectedSparepartId, jumlah });
+  if (!r.success) { alert('Gagal: ' + r.error); return; }
+  closeModal('stokModal');
+  loadInventory();
+}
+
+Auth.requireLogin(["ROLE-ADMIN", "ROLE-OWNER", "ROLE-TEKNISI"]).then(() => {
+  loadInventory();
+});
+</script>
+</body>
+</html>
